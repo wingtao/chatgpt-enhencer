@@ -1,0 +1,26 @@
+.locator-container {
+  position: fixed;
+  top: 60px;
+  right: 40px;
+  width: 260px;
+}
+.locator-nav {
+  width: 100%;
+  max-height: 400px;
+  padding: 6px 6px 6px 12px;
+  overflow: scroll;
+  border-left: 1px solid #d2d3d7;
+}
+.locator-nav-item {
+  display: inline-block;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+  color: #4e4e4e;
+  padding: 4px;
+}
+.locator-nav-item:hover {
+  color: #0069c2;
+}
