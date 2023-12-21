@@ -3,13 +3,14 @@
   top: 60px;
   right: 40px;
   width: 260px;
+  transition: all 300ms linear;
 }
 .locator-nav {
   width: 100%;
   max-height: 400px;
   padding: 6px 6px 6px 12px;
   overflow: scroll;
-  border-left: 1px solid #d2d3d7;
+  border-left: 2px solid #d2d3d7;
 }
 .locator-nav-item {
   display: inline-block;
@@ -23,4 +24,54 @@
 }
 .locator-nav-item:hover {
   color: #0069c2;
+}
+.switcher {
+  position: fixed;
+  top: 70px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  opacity: 0.3;
+  cursor: pointer;
+  z-index: 1;
+}
+.switcher::after {
+  content: "";
+  position: absolute;
+  left: -25px;
+  top: -50%;
+  width: 50px;
+  height: 50px;
+}
+.switcher:hover {
+  opacity: 1;
+}
+.switcher-down,
+.switcher-up {
+  height: 0.75rem;
+  width: 0.25rem;
+  background: #0f0f0f;
+}
+.closed .switcher-up {
+  transform: translateY(0.15rem) rotate(15deg) translateZ(0px);
+}
+.closed .switcher-down {
+  transform: translateY(-0.15rem) rotate(-15deg) translateZ(0px);
+}
+.opening .switcher-up {
+  transform: translateY(0.15rem) rotate(-15deg) translateZ(0px);
+}
+.opening .switcher-down {
+  transform: translateY(-0.15rem) rotate(15deg) translateZ(0px);
+}
+.locator-container.closed {
+  transform: translateX(100px);
+  opacity: 0;
+}
+@media (prefers-color-scheme: dark) {
+  /* 深色模式下的样式 */
+  .locator-nav-item {
+    color: rgb(209, 213, 219);
+  }
 }

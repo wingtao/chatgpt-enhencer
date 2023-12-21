@@ -1,8 +1,8 @@
 {
   "name": "locator-chatgpt-question-locator",
-  "displayName": "Locator chatgpt question locator",
-  "version": "0.0.1",
-  "description": "Find your problem quickly",
+  "displayName": "Locator - chatgpt question locator",
+  "version": "0.0.2",
+  "description": "Find your question quickly",
   "author": "wingtao",
   "scripts": {
     "dev": "plasmo dev",
@@ -22,10 +22,5 @@
     "@types/react-dom": "18.2.15",
     "prettier": "3.0.3",
     "typescript": "5.2.2"
-  },
-  "manifest": {
-    "permissions": [
-      "tabs"
-    ]
   }
 }
