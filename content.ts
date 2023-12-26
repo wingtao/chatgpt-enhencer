@@ -2,6 +2,11 @@ import type { PlasmoCSConfig } from "plasmo"
 
 import "content.css"
 
+import {
+  CHANGE_WIDTH_KEY,
+  CUSTOM_WIDTH_LS_KEY,
+  QUESTION_CATALOG_PANEL_VISIBLE_KEY
+} from "./contants"
 import { escape } from "./escape"
 
 export const config: PlasmoCSConfig = {
@@ -29,26 +34,37 @@ const destroy = () => {
   }
 }
 
+const initPanelVisible = () => {
+  // 本地获取
+  const visible = localStorage.getItem(QUESTION_CATALOG_PANEL_VISIBLE_KEY)
+  if (visible === "closed") {
+    document.body.classList.add("closed")
+    return
+  }
+  document.body.classList.add("opening")
+}
+
 const paintSwitcher = () => {
   switcherContainer = document.createElement("div")
-  switcherContainer.className = "switcher opening"
+  switcherContainer.className = "switcher"
+
   const upper = document.createElement("div")
   const downer = document.createElement("div")
   upper.className = "switcher-up"
   downer.className = "switcher-down"
   switcherContainer.onclick = () => {
-    if (container.className.indexOf("opening") > -1) {
-      container.className = container.className.replace("opening", "closed")
-      switcherContainer.className = switcherContainer.className.replace(
+    if (document.body.className.indexOf("opening") > -1) {
+      document.body.className = document.body.className.replace(
         "opening",
         "closed"
       )
+      localStorage.setItem(QUESTION_CATALOG_PANEL_VISIBLE_KEY, "closed")
     } else {
-      container.className = container.className.replace("closed", "opening")
-      switcherContainer.className = switcherContainer.className.replace(
+      document.body.className = document.body.className.replace(
         "closed",
         "opening"
       )
+      localStorage.setItem(QUESTION_CATALOG_PANEL_VISIBLE_KEY, "opening")
     }
   }
   switcherContainer.appendChild(upper)
@@ -64,7 +80,7 @@ const paintFixedPanel = (param: { id: string; name: string }[]) => {
     container.innerHTML = ""
   } else {
     container = document.createElement("div")
-    container.className = "locator-container opening"
+    container.className = "locator-container"
   }
   const header = document.createElement("h2")
   header.innerText = "Question locator"
@@ -111,6 +127,36 @@ const onDocLoad = debounce(() => {
   paintFixedPanel(questionIds)
 }, 1000)
 
+/** 设置自定义宽度 */
+const setContentCustomWidth = (isOpen: boolean, width: number) => {
+  document
+    .querySelectorAll(".text-base.group")
+    .forEach((ele: HTMLDivElement) => {
+      ele.style.cssText = isOpen ? `${width}%` : ""
+    })
+  if (isOpen) {
+    document.documentElement.style.setProperty("--dynamic-width", `${width}%`)
+    document.body.classList.add("chatgpt-enhancer-custom")
+    chrome.storage.local.set({ [CUSTOM_WIDTH_LS_KEY]: width })
+  } else {
+    document.documentElement.style.removeProperty("--dynamic-width")
+    document.body.classList.remove("chatgpt-enhancer-custom")
+    chrome.storage.local.remove(CUSTOM_WIDTH_LS_KEY)
+  }
+}
+
+let hasLoadAndSetCustomWidth = false
+/** 本地获取自定义宽度 */
+const onCustomWidthChange = () => {
+  if (hasLoadAndSetCustomWidth) return
+  hasLoadAndSetCustomWidth = true
+  chrome.storage.local.get(CUSTOM_WIDTH_LS_KEY).then((result) => {
+    const customWidth = +result[CUSTOM_WIDTH_LS_KEY]
+    if (!customWidth || customWidth > 100 || customWidth < 0) return
+    setContentCustomWidth(!!customWidth, customWidth)
+  })
+}
+
 let observer: MutationObserver | null = null
 const listenContentChange = () => {
   // 停止观察旧的
@@ -135,8 +181,10 @@ const listenContentChange = () => {
 
 const checkIsLoad = () => {
   if (document.querySelector("main")) {
+    initPanelVisible()
     paintSwitcher()
     listenContentChange()
+    onCustomWidthChange()
   } else {
     setTimeout(() => {
       checkIsLoad()
@@ -144,3 +192,11 @@ const checkIsLoad = () => {
   }
 }
 checkIsLoad()
+
+/** 自定义宽度，监听 popup 消息 */
+chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+  if (request.message === CHANGE_WIDTH_KEY && request.width) {
+    setContentCustomWidth(request.isOpen, request.width)
+    sendResponse(true)
+  }
+})

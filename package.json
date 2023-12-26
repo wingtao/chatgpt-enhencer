@@ -1,7 +1,7 @@
 {
   "name": "chatgpt enhencer",
   "displayName": "Chatgpt Enhancer - better experience",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "locate your questions quickly by setting a questions catalog(you can also call it table of questions)",
   "author": "wingtao",
   "scripts": {
@@ -22,5 +22,11 @@
     "@types/react-dom": "18.2.15",
     "prettier": "3.0.3",
     "typescript": "5.2.2"
+  },
+  "manifest": {
+    "permissions": [
+      "activeTab",
+      "storage"
+    ]
   }
 }

@@ -65,7 +65,7 @@
 .opening .switcher-down {
   transform: translateY(-0.15rem) rotate(15deg) translateZ(0px);
 }
-.locator-container.closed {
+.closed .locator-container {
   transform: translateX(100px);
   opacity: 0;
 }
@@ -74,4 +74,8 @@
   .locator-nav-item {
     color: rgb(209, 213, 219);
   }
+}
+
+.chatgpt-enhancer-custom .text-base.group {
+  max-width: var(--dynamic-width);
 }
