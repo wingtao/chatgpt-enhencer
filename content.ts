@@ -83,7 +83,7 @@ const paintFixedPanel = (param: { id: string; name: string }[]) => {
     container.className = "locator-container"
   }
   const header = document.createElement("h2")
-  header.innerText = "Question locator"
+  header.innerText = "Table Of Question"
   header.style.cssText = "margin-bottom: 16px"
   const panel = document.createElement("ul")
   panel.className = "locator-nav"

@@ -60,7 +60,7 @@ export default function IndexPopup() {
         <div className="section-content">
           <div className="section-content-item">
             <span>enable</span>
-            <span>width</span>
+            <span>width(%)</span>
           </div>
           <div className="section-content-item">
             <input type="checkbox" checked={isOpen} onChange={onToggleWidth} />
