@@ -79,3 +79,7 @@
 .chatgpt-enhancer-custom .text-base.group {
   max-width: var(--dynamic-width);
 }
+
+.BearGpt-prompt-iconWrap {
+  position: absolute;
+}

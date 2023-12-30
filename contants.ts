@@ -10,3 +10,5 @@ export const QUESTION_CATALOG_PANEL_VISIBLE_KEY =
   prefix_localStore_key + "PANEL_VISIBLE_KEY"
 
 export const CHANGE_WIDTH_KEY = "change_width"
+
+export const PROMPT_INPUT_KEY = "prompt-textarea"

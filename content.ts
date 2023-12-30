@@ -5,8 +5,10 @@ import "content.css"
 import {
   CHANGE_WIDTH_KEY,
   CUSTOM_WIDTH_LS_KEY,
+  PROMPT_INPUT_KEY,
   QUESTION_CATALOG_PANEL_VISIBLE_KEY
 } from "./contants"
+import { stickyPromptIconToInput } from "./contentPrompt"
 import { escape } from "./escape"
 
 export const config: PlasmoCSConfig = {
@@ -179,14 +181,17 @@ const listenContentChange = () => {
   observer.observe(targetNode, config)
 }
 
+let loadTimer: number | null = null
 const checkIsLoad = () => {
   if (document.querySelector("main")) {
+    clearTimeout(loadTimer)
     initPanelVisible()
     paintSwitcher()
     listenContentChange()
     onCustomWidthChange()
+    stickyPromptIconToInput()
   } else {
-    setTimeout(() => {
+    loadTimer = window.setTimeout(() => {
       checkIsLoad()
     }, 1000)
   }
