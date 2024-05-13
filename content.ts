@@ -12,7 +12,7 @@ import { stickyPromptIconToInput } from "./contentPrompt"
 import { escape } from "./escape"
 
 export const config: PlasmoCSConfig = {
-  matches: ["https://chat.openai.com/*"]
+  matches: ["https://chat.openai.com/*", "https://chatgpt.com/*"]
 }
 
 const debounce = (fn: (...arg: any) => void, timeout: number) => {
@@ -131,11 +131,9 @@ const onDocLoad = debounce(() => {
 
 /** 设置自定义宽度 */
 const setContentCustomWidth = (isOpen: boolean, width: number) => {
-  document
-    .querySelectorAll(".text-base.group")
-    .forEach((ele: HTMLDivElement) => {
-      ele.style.cssText = isOpen ? `${width}%` : ""
-    })
+  // document.querySelectorAll("[data-testid").forEach((ele: HTMLDivElement) => {
+  //   ele.style.cssText = isOpen ? `${width}%` : ""
+  // })
   if (isOpen) {
     document.documentElement.style.setProperty("--dynamic-width", `${width}%`)
     document.body.classList.add("chatgpt-enhancer-custom")
@@ -189,7 +187,7 @@ const checkIsLoad = () => {
     paintSwitcher()
     listenContentChange()
     onCustomWidthChange()
-    stickyPromptIconToInput()
+    // stickyPromptIconToInput()
   } else {
     loadTimer = window.setTimeout(() => {
       checkIsLoad()
