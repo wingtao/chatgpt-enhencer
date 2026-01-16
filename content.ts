@@ -10,6 +10,7 @@ import {
 } from "./contants"
 import { stickyPromptIconToInput } from "./contentPrompt"
 import { escape } from "./escape"
+import { enableMermaidPreview } from "./mermaid"
 
 export const config: PlasmoCSConfig = {
   matches: ["https://chat.openai.com/*", "https://chatgpt.com/*"]
@@ -48,70 +49,109 @@ const initPanelVisible = () => {
 
 const paintSwitcher = () => {
   switcherContainer = document.createElement("div")
-  switcherContainer.className = "switcher"
+  switcherContainer.className = "bear-gpt-switcher"
+  switcherContainer.title = "Toggle Table of Questions"
 
-  const upper = document.createElement("div")
-  const downer = document.createElement("div")
-  upper.className = "switcher-up"
-  downer.className = "switcher-down"
+  // 使用 SVG 图标代替纯 CSS 绘制的箭头
+  switcherContainer.innerHTML = `
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  `
+
   switcherContainer.onclick = () => {
-    if (document.body.className.indexOf("opening") > -1) {
-      document.body.className = document.body.className.replace(
-        "opening",
-        "closed"
-      )
+    const isOpening = document.body.classList.contains("opening")
+    if (isOpening) {
+      document.body.classList.replace("opening", "closed")
       localStorage.setItem(QUESTION_CATALOG_PANEL_VISIBLE_KEY, "closed")
     } else {
-      document.body.className = document.body.className.replace(
-        "closed",
-        "opening"
-      )
+      document.body.classList.replace("closed", "opening")
       localStorage.setItem(QUESTION_CATALOG_PANEL_VISIBLE_KEY, "opening")
     }
   }
-  switcherContainer.appendChild(upper)
-  switcherContainer.appendChild(downer)
   document.body.appendChild(switcherContainer)
 }
 
 const paintFixedPanel = (param: { id: string; name: string }[]) => {
   if (!param?.length) {
+    if (container) container.style.display = "none"
     return
   }
+  
   if (container) {
     container.innerHTML = ""
+    container.style.display = "block"
   } else {
     container = document.createElement("div")
-    container.className = "locator-container"
+    container.className = "bear-gpt-panel"
   }
-  const header = document.createElement("h2")
-  header.innerText = "Table Of Question"
-  header.style.cssText = "margin-bottom: 16px"
+
+  // Header
+  const header = document.createElement("div")
+  header.className = "bear-gpt-header"
+  
+  const title = document.createElement("h3")
+  title.innerText = "Questions"
+  
+  const count = document.createElement("span")
+  count.className = "bear-gpt-count"
+  count.innerText = `${param.length}`
+
+  header.appendChild(title)
+  header.appendChild(count)
+
+  // List
   const panel = document.createElement("ul")
-  panel.className = "locator-nav"
+  panel.className = "bear-gpt-list"
+  
   panel.onclick = (e: MouseEvent) => {
-    const target = e.target as HTMLDivElement
-    const id = target.getAttribute("question-id")
+    // 处理事件委托，确保点击 li 内部元素也能触发
+    const target = (e.target as HTMLElement).closest(".bear-gpt-item") as HTMLElement
+    if (!target) return
+    
+    const id = target.getAttribute("data-question-id")
     if (id) {
       document.querySelector(`main [${ID_KEY}="${id}"]`)?.scrollIntoView({
         behavior: "smooth",
         block: "center"
       })
+      
+      // 移除其他项的高亮
+      panel.querySelectorAll(".bear-gpt-item").forEach(item => item.classList.remove("active"))
+      target.classList.add("active")
     }
   }
+
   const fragment = document.createDocumentFragment()
-  param.forEach(({ id, name }) => {
-    const aLink = document.createElement("li")
-    aLink.setAttribute("question-id", id)
-    aLink.innerText = escape(name)?.replace(/\n/g, " ")
-    aLink.className = "locator-nav-item"
-    aLink.title = name
-    fragment.appendChild(aLink)
+  param.forEach(({ id, name }, index) => {
+    const li = document.createElement("li")
+    li.className = "bear-gpt-item"
+    li.setAttribute("data-question-id", id)
+    li.title = name
+    
+    // 序号
+    const num = document.createElement("span")
+    num.className = "bear-gpt-item-num"
+    num.innerText = `${index + 1}.`
+    
+    // 文本
+    const text = document.createElement("span")
+    text.className = "bear-gpt-item-text"
+    text.innerText = escape(name)?.replace(/\n/g, " ") || "Untitled Question"
+
+    li.appendChild(num)
+    li.appendChild(text)
+    fragment.appendChild(li)
   })
+
   panel.appendChild(fragment)
   container.appendChild(header)
   container.appendChild(panel)
-  document.body.appendChild(container)
+  
+  // 如果尚未添加到 body
+  if (!document.body.contains(container)) {
+    document.body.appendChild(container)
+  }
 }
 
 const onDocLoad = debounce(() => {
@@ -157,6 +197,7 @@ const onCustomWidthChange = () => {
   })
 }
 
+
 let observer: MutationObserver | null = null
 const listenContentChange = () => {
   // 停止观察旧的
@@ -187,6 +228,8 @@ const checkIsLoad = () => {
     paintSwitcher()
     listenContentChange()
     onCustomWidthChange()
+    // 默认启用 Mermaid 预览
+    enableMermaidPreview()
     // stickyPromptIconToInput()
   } else {
     loadTimer = window.setTimeout(() => {
@@ -196,8 +239,9 @@ const checkIsLoad = () => {
 }
 checkIsLoad()
 
-/** 自定义宽度，监听 popup 消息 */
+/** 监听 popup 消息 */
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+  // 自定义宽度
   if (request.message === CHANGE_WIDTH_KEY && request.width) {
     setContentCustomWidth(request.isOpen, request.width)
     sendResponse(true)
